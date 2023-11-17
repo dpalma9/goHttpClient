@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	//"io/ioutil"
+	"io/ioutil"
 	"log"
 )
 
@@ -58,6 +58,41 @@ import (
 //	log.Println(string(data))
 //}
 //
+func makeGetWithoutTLS(url string, token string) {
+	client := &http.Client{}
+
+	//Create a new request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set header
+	req.Header.Set("X-Vault-Token", token)
+
+	// Make the request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Close response body
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Dump response
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(string(data))
+}
+
 func makePostRequest(url string, body string) {
 
 	// Prepare a JSON body
@@ -110,4 +145,5 @@ func makePostRequest(url string, body string) {
 
 func main() {
 	makePostRequest("http://0.0.0.0:9000", "{\"field1\": \"value1\"}")
+	makeGetWithoutTLS("http://0.0.0.0:9000", "mytokenlargocifradosuperseguro")
 }
