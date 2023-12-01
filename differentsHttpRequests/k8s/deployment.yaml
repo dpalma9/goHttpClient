@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gohttpclient-test
+  namespace: cxb-prtoel-pro
+spec:
+  selector:
+    matchLabels:
+      app: gohttpclient
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gohttpclient
+    spec:
+      containers:
+        - name: gohttpclient
+          image: docker-registry.cloud.caixabank.com/containers/bchicp/gohttpclientibmcloud:0.0.0
+          resources:
+            limits:
+              cpu: "0.05"
+              memory: 384Mi
+            requests:
+              cpu: "0.025"
+              memory: 64Mi
+          volumeMounts:
+            - name: vault-certificate
+              readOnly: true
+              mountPath: "/opt/certificates"
+            - name: ca
+              readOnly: true
+              mountPath: "/opt/ca"
+          securityContext:
+            capabilities:
+              drop: ["KILL", "SETGID", "SETGID", "SETUID"]
+      imagePullSecrets:
+        - name: registry
+      nodeSelector:
+        kubernetes.io/os: linux
+        worker.application.type: all
+      volumes:
+      - name: vault-certificate
+        secret:
+          secretName: vault-certificate
+      - name: ca
+        configMap:
+          name: ca-cert-cm
+      automountServiceAccountToken: false

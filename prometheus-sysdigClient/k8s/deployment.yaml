@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gosysdig-test
+  namespace: cxb-prtoel-pro
+spec:
+  selector:
+    matchLabels:
+      app: gosysdig
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gosysdig
+    spec:
+      containers:
+        - name: gosysdig
+          image: docker-registry.cloud.caixabank.com/containers/bchicp/gosysdig:0.0.0
+          resources:
+            limits:
+              cpu: "0.05"
+              memory: 384Mi
+            requests:
+              cpu: "0.025"
+              memory: 64Mi
+          securityContext:
+            capabilities:
+              drop: ["KILL", "SETGID", "SETGID", "SETUID"]
+      imagePullSecrets:
+        - name: registry
+      nodeSelector:
+        kubernetes.io/os: linux
+        worker.application.type: all
+      automountServiceAccountToken: false
